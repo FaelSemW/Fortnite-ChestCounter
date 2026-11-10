@@ -1,0 +1,578 @@
+<Window x:Class="ChestCounter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Contador de Baús Fortnite"
+        Height="780" Width="1180"
+        MinHeight="600" MinWidth="960"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B0F19"
+        Foreground="#F8FAFC"
+        FontFamily="Segoe UI, Bahnschrift, sans-serif"
+        WindowStyle="None"
+        AllowsTransparency="False">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="48"
+                            ResizeBorderThickness="6"
+                            CornerRadius="0"
+                            GlassFrameThickness="0"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BgDark" Color="#0B0F19"/>
+        <SolidColorBrush x:Key="SurfaceDark" Color="#111827"/>
+        <SolidColorBrush x:Key="CardBg" Color="#162032"/>
+        <SolidColorBrush x:Key="CardHover" Color="#1E2B45"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#22304A"/>
+        <SolidColorBrush x:Key="Gold" Color="#F59E0B"/>
+        <SolidColorBrush x:Key="GoldLight" Color="#FBBF24"/>
+        <SolidColorBrush x:Key="GoldBg" Color="#261E0A"/>
+        <SolidColorBrush x:Key="Cyan" Color="#06B6D4"/>
+        <SolidColorBrush x:Key="CyanBg" Color="#082A36"/>
+        <SolidColorBrush x:Key="Green" Color="#10B981"/>
+        <SolidColorBrush x:Key="GreenBg" Color="#0A2A1E"/>
+        <SolidColorBrush x:Key="Purple" Color="#A855F7"/>
+        <SolidColorBrush x:Key="PurpleBg" Color="#23103A"/>
+        <SolidColorBrush x:Key="Orange" Color="#F97316"/>
+        <SolidColorBrush x:Key="OrangeBg" Color="#2E160A"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#94A3B8"/>
+        <SolidColorBrush x:Key="TextDim" Color="#64748B"/>
+
+        <!-- Custom ScrollBar Style -->
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid Background="Transparent">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.Thumb>
+                                    <Thumb Background="#334155">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                <Border Background="#334155" CornerRadius="4" Margin="1,0"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Window Control Button Style -->
+        <Style x:Key="WinBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#1E293B"/>
+                                <Setter Property="Foreground" Value="#F8FAFC"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CloseBtn" TargetType="Button" BasedOn="{StaticResource WinBtn}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DC2626"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Filter Pill Button Style -->
+        <Style x:Key="FilterBtn" TargetType="Button">
+            <Setter Property="Background" Value="#162032"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#22304A"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#22304A"/>
+                                <Setter Property="Foreground" Value="#F8FAFC"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FilterBtnActive" TargetType="Button" BasedOn="{StaticResource FilterBtn}">
+            <Setter Property="Background" Value="#F59E0B"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="BorderBrush" Value="#F59E0B"/>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2A384F"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#475569"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#0B0F19">
+        <Grid.RowDefinitions>
+            <!-- Title Bar -->
+            <RowDefinition Height="48"/>
+            <!-- Quick Actions Bar -->
+            <RowDefinition Height="52"/>
+            <!-- Hero Stats Row -->
+            <RowDefinition Height="114"/>
+            <!-- Tip Banner -->
+            <RowDefinition Height="36"/>
+            <!-- Filters & Search -->
+            <RowDefinition Height="50"/>
+            <!-- Main Matches List -->
+            <RowDefinition Height="*"/>
+            <!-- Status Bar -->
+            <RowDefinition Height="34"/>
+        </Grid.RowDefinitions>
+
+        <!-- ==================== 1. TITLE BAR ==================== -->
+        <Border Grid.Row="0" Background="#101726" BorderBrush="#1E293B" BorderThickness="0,0,0,1">
+            <Grid Margin="16,0,8,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: App Icon & Title -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Golden Chest Icon -->
+                    <Border Background="#261E0A" BorderBrush="#F59E0B" BorderThickness="1.5" CornerRadius="8" Width="30" Height="30" Margin="0,0,10,0">
+                        <TextBlock Text="📦" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="CONTADOR DE BAÚS" FontSize="14" FontWeight="Bold" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                    <Border Background="#23103A" BorderBrush="#A855F7" BorderThickness="1" CornerRadius="6" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="FORTNITE v1.4.0" FontSize="10" FontWeight="Bold" Foreground="#C084FC"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Center: Player Profile & Live Status -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="0,0,12,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="👤" FontSize="12" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtPlayerName" Text="Jogador" FontSize="12" FontWeight="SemiBold" Foreground="#F8FAFC" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Live Match Status Pill -->
+                    <Border x:Name="PillStatus" Background="#0A2A1E" BorderBrush="#10B981" BorderThickness="1" CornerRadius="12" Padding="10,4">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="DotStatus" Width="8" Height="8" Fill="#10B981" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtLiveStatus" Text="Monitorando replays" FontSize="11" FontWeight="Bold" Foreground="#10B981" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Right: Window Buttons -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource WinBtn}" Content="─" Click="BtnMinimize_Click" ToolTip="Minimizar"/>
+                    <Button Style="{StaticResource WinBtn}" Content="□" Click="BtnMaximize_Click" ToolTip="Maximizar"/>
+                    <Button Style="{StaticResource CloseBtn}" Content="✕" Click="BtnClose_Click" ToolTip="Fechar"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 2. QUICK ACTIONS BAR ==================== -->
+        <Border Grid.Row="1" Background="#0E1523" BorderBrush="#1E293B" BorderThickness="0,0,0,1" Padding="16,0">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="BtnToggleOverlay" Grid.Column="0" Style="{StaticResource ActionBtn}" Margin="0,0,8,0" Click="BtnToggleOverlay_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="👁️" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="TxtOverlayToggle" Text="Overlay em Jogo: ATIVADO"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BtnLockOverlay" Grid.Column="1" Style="{StaticResource ActionBtn}" Margin="0,0,8,0" Click="BtnLockOverlay_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🔒" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="TxtLockToggle" Text="Travar Cliques (Ctrl+Shift+L)"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BtnStyleOverlay" Grid.Column="2" Style="{StaticResource ActionBtn}" Margin="0,0,8,0" Click="BtnStyleOverlay_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎨" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="TxtStyleToggle" Text="Estilo: HUD Minimapa"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Right: Refresh & Feedback -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtRefreshFeedback" Text="" FontSize="11" Foreground="#10B981" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <Button x:Name="BtnRefresh" Style="{StaticResource ActionBtn}" Background="#261E0A" BorderBrush="#F59E0B" Click="BtnRefresh_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="IconRefresh" Text="🔄" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtRefreshLabel" Text="Atualizar Partidas" FontWeight="Bold" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 3. HERO STAT CARDS ==================== -->
+        <Grid Grid.Row="2" Margin="16,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card 1: Total de Baús -->
+            <Border Grid.Column="0" Background="#162032" BorderBrush="#F59E0B" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <TextBlock Text="📦" FontSize="13" Margin="0,0,6,0"/>
+                        <TextBlock Text="TOTAL DE BAÚS" FontSize="11" FontWeight="Bold" Foreground="#F59E0B"/>
+                    </StackPanel>
+                    <TextBlock x:Name="StatTotalChests" Grid.Row="1" Text="1.816" FontSize="30" FontWeight="Bold" Foreground="#FBBF24" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Text="Abertos ou destruídos" FontSize="10" Foreground="#94A3B8"/>
+                </Grid>
+            </Border>
+
+            <!-- Card 2: Partidas Analisadas -->
+            <Border Grid.Column="1" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <TextBlock Text="🎮" FontSize="13" Margin="0,0,6,0"/>
+                        <TextBlock Text="PARTIDAS" FontSize="11" FontWeight="Bold" Foreground="#06B6D4"/>
+                    </StackPanel>
+                    <TextBlock x:Name="StatTotalMatches" Grid.Row="1" Text="99" FontSize="30" FontWeight="Bold" Foreground="#22D3EE" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Text="Todas gravadas sem limite" FontSize="10" Foreground="#94A3B8"/>
+                </Grid>
+            </Border>
+
+            <!-- Card 3: Média por Partida -->
+            <Border Grid.Column="2" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <TextBlock Text="📈" FontSize="13" Margin="0,0,6,0"/>
+                        <TextBlock Text="MÉDIA / PARTIDA" FontSize="11" FontWeight="Bold" Foreground="#10B981"/>
+                    </StackPanel>
+                    <TextBlock x:Name="StatAvgChests" Grid.Row="1" Text="18.3" FontSize="30" FontWeight="Bold" Foreground="#34D399" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Text="Baús por jogo" FontSize="10" Foreground="#94A3B8"/>
+                </Grid>
+            </Border>
+
+            <!-- Card 4: Recorde em 1 Partida -->
+            <Border Grid.Column="3" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <TextBlock Text="🏆" FontSize="13" Margin="0,0,6,0"/>
+                        <TextBlock Text="RECORDE" FontSize="11" FontWeight="Bold" Foreground="#F97316"/>
+                    </StackPanel>
+                    <TextBlock x:Name="StatBestMatch" Grid.Row="1" Text="40" FontSize="30" FontWeight="Bold" Foreground="#FB923C" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatBestMatchSub" Grid.Row="2" Text="Máximo em 1 partida" FontSize="10" Foreground="#94A3B8"/>
+                </Grid>
+            </Border>
+
+            <!-- Card 5: Tesouros Especiais -->
+            <Border Grid.Column="4" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Padding="14,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <TextBlock Text="⭐" FontSize="13" Margin="0,0,6,0"/>
+                        <TextBlock Text="TESOUROS" FontSize="11" FontWeight="Bold" Foreground="#A855F7"/>
+                    </StackPanel>
+                    <TextBlock x:Name="StatTreasures" Grid.Row="1" Text="12" FontSize="30" FontWeight="Bold" Foreground="#C084FC" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Text="Gizmos e baús dourados" FontSize="10" Foreground="#94A3B8"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ==================== 4. TIP BANNER ==================== -->
+        <Border Grid.Row="3" Margin="16,0,16,6" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="14,0">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="⚡" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Sincronização 100% Automática:" FontWeight="Bold" Foreground="#38BDF8" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="O Fortnite grava o replay durante a partida. Ao voltar para o Lobby, os baús são contabilizados sozinhos!" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Grid.Column="2" x:Name="TxtFortniteProcessStatus" Text="● Fortnite aberto" FontSize="11" FontWeight="SemiBold" Foreground="#10B981" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 5. FILTERS & SEARCH BAR ==================== -->
+        <Border Grid.Row="4" Background="#0E1523" BorderBrush="#1E293B" BorderThickness="0,1,0,1" Padding="16,0">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="260"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Filter Buttons -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button x:Name="BtnFilterAll" Content="Todas as Partidas" Style="{StaticResource FilterBtnActive}" Click="FilterBtn_Click" Tag="All"/>
+                    <Button x:Name="BtnFilterNoBuild" Content="Construção Zero" Style="{StaticResource FilterBtn}" Click="FilterBtn_Click" Tag="NoBuild"/>
+                    <Button x:Name="BtnFilterSquads" Content="Esquadrões" Style="{StaticResource FilterBtn}" Click="FilterBtn_Click" Tag="Squads"/>
+                    <Button x:Name="BtnFilterSolo" Content="Solo" Style="{StaticResource FilterBtn}" Click="FilterBtn_Click" Tag="Solo"/>
+                    <Button x:Name="BtnFilterWins" Content="Vitórias Royale 👑" Style="{StaticResource FilterBtn}" Click="FilterBtn_Click" Tag="Wins"/>
+                </StackPanel>
+
+                <!-- Search Input -->
+                <Border Grid.Column="2" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="8" Height="32">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="🔍" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtSearch" Grid.Column="1" Background="Transparent" BorderThickness="0" 
+                                 Foreground="#F8FAFC" VerticalAlignment="Center" FontSize="12" 
+                                 Padding="0,0,8,0" TextChanged="TxtSearch_TextChanged"/>
+                        <TextBlock x:Name="TxtSearchPlaceholder" Grid.Column="1" Text="Buscar partida..." 
+                                   Foreground="#64748B" FontSize="12" VerticalAlignment="Center" 
+                                   IsHitTestVisible="False" Margin="2,0,0,0"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 6. MATCHES LIST ==================== -->
+        <Grid Grid.Row="5" Margin="16,10">
+            <Border Background="#101726" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Table Header -->
+                        <RowDefinition Height="38"/>
+                        <!-- Table Content -->
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header Row -->
+                    <Border Grid.Row="0" Background="#162032" CornerRadius="10,10,0,0" Padding="16,0">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="170"/>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="DATA / HORA" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="1" Text="MODO DE JOGO" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="2" Text="COLOCAÇÃO" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="3" Text="BAÚS ABERTOS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="4" Text="TESOUROS / ESPECIAIS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="5" Text="ARQUIVO DE REPLAY" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- ListView / ItemsControl -->
+                    <ListView x:Name="ListMatches" Grid.Row="1" Background="Transparent" BorderThickness="0" 
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              VirtualizingStackPanel.IsVirtualizing="True"
+                              VirtualizingStackPanel.VirtualizationMode="Recycling">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="BorderBrush" Value="#162032"/>
+                                <Setter Property="Padding" Value="16,10"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#172236"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter Property="Background" Value="#1F2E4A"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="220"/>
+                                        <ColumnDefinition Width="170"/>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Date & Time -->
+                                    <TextBlock Grid.Column="0" Text="{Binding DateFormatted}" FontSize="13" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center"/>
+
+                                    <!-- Mode Badge -->
+                                    <Border Grid.Column="1" HorizontalAlignment="Left" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding ModeFormatted}" FontSize="12" Foreground="#94A3B8"/>
+                                    </Border>
+
+                                    <!-- Placement -->
+                                    <Border Grid.Column="2" HorizontalAlignment="Left" Background="{Binding PlacementBg}" BorderBrush="{Binding PlacementBorder}" BorderThickness="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding PlacementFormatted}" FontSize="12" FontWeight="{Binding PlacementWeight}" Foreground="{Binding PlacementColor}"/>
+                                    </Border>
+
+                                    <!-- Chests Count + Progress Bar -->
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding ChestsCount}" FontSize="16" FontWeight="Bold" Foreground="#F59E0B" Width="36" VerticalAlignment="Center"/>
+                                        <ProgressBar Width="90" Height="8" Minimum="0" Maximum="45" Value="{Binding ChestsCount}" 
+                                                     Background="#162032" Foreground="#F59E0B" BorderThickness="0" VerticalAlignment="Center" Margin="6,0,0,0">
+                                            <ProgressBar.Clip>
+                                                <RectangleGeometry Rect="0,0,90,8" RadiusX="4" RadiusY="4"/>
+                                            </ProgressBar.Clip>
+                                        </ProgressBar>
+                                    </StackPanel>
+
+                                    <!-- Treasures -->
+                                    <TextBlock Grid.Column="4" Text="{Binding TreasureText}" FontSize="12" FontWeight="SemiBold" Foreground="#C084FC" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                                    <!-- Replay File -->
+                                    <TextBlock Grid.Column="5" Text="{Binding ReplayFile}" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ==================== 7. BOTTOM STATUS BAR ==================== -->
+        <Border Grid.Row="6" Background="#0A0E17" BorderBrush="#162032" BorderThickness="0,1,0,0" Padding="16,0">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="📁 Demos: " FontSize="11" Foreground="#64748B"/>
+                    <TextBlock x:Name="TxtDemosFolder" Text="%LOCALAPPDATA%\FortniteGame\Saved\Demos" FontSize="11" Foreground="#94A3B8"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock x:Name="TxtAutoSyncStatus" Text="● Auto-sync: Ativo (a cada 2s)" FontSize="11" Foreground="#10B981" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Atalhos:  Ctrl+Shift+O (Overlay)   •   Ctrl+Shift+L (Travar clique)" 
+                               FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="Total listado: " FontSize="11" Foreground="#64748B"/>
+                    <TextBlock x:Name="TxtMatchesCountStatus" Text="100 partidas" FontSize="11" FontWeight="Bold" Foreground="#06B6D4"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

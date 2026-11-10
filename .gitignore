@@ -1,0 +1,14 @@
+bin/
+obj/
+dist/
+dist-*/
+*.user
+.vs/
+*.replay
+*.log
+data.json
+config.json
+matches.csv
+report.html
+.vscode/
+.idea/
