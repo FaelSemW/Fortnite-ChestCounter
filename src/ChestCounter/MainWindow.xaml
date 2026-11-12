@@ -281,10 +281,10 @@
                 <!-- Right: Cloud, Feedback & Refresh -->
                 <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock x:Name="TxtRefreshFeedback" Text="" FontSize="11" Foreground="#10B981" Margin="0,0,10,0" VerticalAlignment="Center" MaxWidth="260" TextTrimming="CharacterEllipsis"/>
-                    <Button x:Name="BtnCloud" Style="{StaticResource ActionBtn}" Margin="0,0,8,0" Click="BtnCloud_Click" ToolTip="Salvar e sincronizar baús na nuvem (Render)">
+                    <Button x:Name="BtnCloud" Style="{StaticResource ActionBtn}" Margin="0,0,8,0" Click="BtnCloud_Click" ToolTip="Entre ou crie uma conta para salvar seus baús, partidas e sessão na nuvem">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock x:Name="IconCloud" Text="☁" Foreground="#38BDF8" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TxtCloudStatus" Text="Nuvem: Conectar" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtCloudStatus" Text="Save na Nuvem: Entrar" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnRefresh" Style="{StaticResource ActionBtn}" Background="#261E0A" BorderBrush="#F59E0B" Click="BtnRefresh_Click">

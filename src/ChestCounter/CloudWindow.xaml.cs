@@ -19,7 +19,6 @@ public partial class CloudWindow : Window
         _config = config;
         _data = data;
 
-        TxtUrl.Text = _config.CloudUrl ?? "";
         TxtUser.Text = _config.CloudUser ?? "";
         RefreshView();
     }
@@ -33,7 +32,7 @@ public partial class CloudWindow : Window
         if (logged)
         {
             TxtAccountUser.Text = $"Conectado como {_config.CloudUser}";
-            TxtAccountServer.Text = $"Servidor: {_config.CloudUrl}";
+            TxtAccountServer.Text = "Nuvem ativa • Sincronização automática ligada";
             var sessionChests = _data.Matches.Where(ReportWriter.IsThisSession).Sum(m => m.ChestsOpened);
             var totalChests = _data.Matches.Sum(m => m.ChestsOpened);
             TxtLocalSummary.Text = $"Total: {totalChests:N0} baús ({_data.Matches.Count:N0} partidas) • Sessão atual: {sessionChests:N0}";
@@ -49,7 +48,6 @@ public partial class CloudWindow : Window
         BtnRegister.IsEnabled = !busy;
         BtnSync.IsEnabled = !busy;
         BtnLogout.IsEnabled = !busy;
-        TxtUrl.IsEnabled = !busy;
         TxtUser.IsEnabled = !busy;
         TxtPassword.IsEnabled = !busy;
 
@@ -63,23 +61,17 @@ public partial class CloudWindow : Window
 
     private async Task AuthenticateAsync(bool register)
     {
-        var url = TxtUrl.Text.Trim();
         var user = TxtUser.Text.Trim();
         var pass = TxtPassword.Password;
 
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            SetBusy(false, "Cole o link do seu servidor no Render.", "#FCA5A5");
-            return;
-        }
         if (string.IsNullOrWhiteSpace(user) || string.IsNullOrEmpty(pass))
         {
             SetBusy(false, "Informe usuário e senha.", "#FCA5A5");
             return;
         }
 
-        SetBusy(true, register ? "Criando conta e acordando o servidor..." : "Entrando e acordando o servidor...", "#38BDF8");
-        var auth = await _cloud.AuthAsync(url, user, pass, register);
+        SetBusy(true, register ? "Criando conta na nuvem..." : "Entrando na sua conta...", "#38BDF8");
+        var auth = await _cloud.AuthAsync(null, user, pass, register);
         if (!auth.Ok)
         {
             SetBusy(false, auth.Message, "#FCA5A5");

@@ -499,7 +499,7 @@ public partial class MainWindow : Window
         else
         {
             IconCloud.Foreground = new SolidColorBrush(Color.FromRgb(56, 189, 248));
-            TxtCloudStatus.Text = "Nuvem: Conectar";
+            TxtCloudStatus.Text = "Save na Nuvem: Entrar";
             TxtCloudStatus.Foreground = new SolidColorBrush(Color.FromRgb(226, 232, 240));
         }
     }

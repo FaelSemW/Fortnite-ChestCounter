@@ -12,6 +12,8 @@ public sealed record CloudResult(bool Ok, string Message);
 /// </summary>
 public sealed class CloudSync
 {
+    public const string DefaultCloudUrl = "https://chestcounter-cloud.onrender.com";
+
     private static readonly JsonSerializerOptions Json = new()
     {
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
@@ -31,7 +33,8 @@ public sealed class CloudSync
         _data = data;
     }
 
-    public bool IsLoggedIn => !string.IsNullOrEmpty(_config.CloudToken) && !string.IsNullOrEmpty(_config.CloudUrl);
+    public string EffectiveUrl => string.IsNullOrWhiteSpace(_config.CloudUrl) ? DefaultCloudUrl : NormalizeUrl(_config.CloudUrl);
+    public bool IsLoggedIn => !string.IsNullOrEmpty(_config.CloudToken);
     public string? User => _config.CloudUser;
     public bool Busy => _busy;
     public DateTime? LastSyncLocal { get; private set; }
@@ -60,11 +63,11 @@ public sealed class CloudSync
         return $"Erro {(int)r.StatusCode}";
     }
 
-    public async Task<CloudResult> AuthAsync(string url, string user, string password, bool register)
+    public async Task<CloudResult> AuthAsync(string? url, string user, string password, bool register)
     {
         try
         {
-            url = NormalizeUrl(url);
+            url = string.IsNullOrWhiteSpace(url) ? DefaultCloudUrl : NormalizeUrl(url);
             var r = await _http.PostAsJsonAsync($"{url}/api/{(register ? "register" : "login")}", new { username = user.Trim(), password });
             if (!r.IsSuccessStatusCode) return new CloudResult(false, await ReadError(r));
             var j = await r.Content.ReadFromJsonAsync<JsonElement>();
@@ -88,7 +91,7 @@ public sealed class CloudSync
 
     private HttpRequestMessage Req(HttpMethod m, string path, object? body = null)
     {
-        var req = new HttpRequestMessage(m, _config.CloudUrl + path);
+        var req = new HttpRequestMessage(m, EffectiveUrl + path);
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _config.CloudToken);
         if (body != null) req.Content = JsonContent.Create(body, options: Json);
         return req;

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Save na Nuvem — Fortnite ChestCounter"
-        Width="460"
+        Width="440"
         SizeToContent="Height"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
@@ -99,7 +99,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
                     <TextBlock Text="☁" FontSize="15" Foreground="#38BDF8" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="SAVE NA NUVEM (RENDER)" FontSize="12" FontWeight="Bold" Foreground="#F8FAFC" VerticalAlignment="Center"/>
+                    <TextBlock Text="CONTA &amp; SAVE NA NUVEM" FontSize="12" FontWeight="Bold" Foreground="#F8FAFC" VerticalAlignment="Center"/>
                 </StackPanel>
                 <Button Grid.Column="1" Width="40" Height="40" Content="✕" FontSize="12" Foreground="#94A3B8" Background="Transparent" BorderThickness="0"
                         Cursor="Hand" Click="BtnClose_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
@@ -108,16 +108,11 @@
             <Border Height="1" Background="#1E293B"/>
 
             <StackPanel Margin="20,16,20,20">
-                <TextBlock Text="Guarde seu total de baús, partidas e sessão atual na nuvem. Se formatar o PC ou entrar em outro computador, basta fazer login."
+                <TextBlock Text="Guarde seu total de baús, histórico de partidas e sessão atual na nuvem. Ao formatar ou entrar em outro PC, faça login com seu usuário e senha."
                            TextWrapping="Wrap" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,14"/>
 
                 <!-- Login / Register View -->
                 <StackPanel x:Name="PanelLogin">
-                    <TextBlock Text="LINK DO SERVIDOR NO RENDER" FontSize="11" FontWeight="SemiBold" Foreground="#CBD5E1" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtUrl" Style="{StaticResource DarkInput}" Margin="0,0,0,3"/>
-                    <TextBlock Text="Ex: https://seu-app.onrender.com (seu Web Service conectado ao Postgres)"
-                               FontSize="10.5" Foreground="#64748B" Margin="0,0,0,12"/>
-
                     <TextBlock Text="USUÁRIO" FontSize="11" FontWeight="SemiBold" Foreground="#CBD5E1" Margin="0,0,0,4"/>
                     <TextBox x:Name="TxtUser" Style="{StaticResource DarkInput}" Margin="0,0,0,3"/>
                     <TextBlock Text="3 a 24 caracteres (letras, números, _ . -)"
@@ -125,8 +120,8 @@
 
                     <TextBlock Text="SENHA" FontSize="11" FontWeight="SemiBold" Foreground="#CBD5E1" Margin="0,0,0,4"/>
                     <PasswordBox x:Name="TxtPassword" Style="{StaticResource DarkPass}" KeyDown="TxtPassword_KeyDown" Margin="0,0,0,3"/>
-                    <TextBlock Text="Mínimo de 8 caracteres (armazenada com criptografia bcrypt no banco)"
-                               FontSize="10.5" Foreground="#64748B" Margin="0,0,0,14"/>
+                    <TextBlock Text="Mínimo de 8 caracteres (armazenada com criptografia)"
+                               FontSize="10.5" Foreground="#64748B" Margin="0,0,0,16"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -138,7 +133,7 @@
                         <Button x:Name="BtnRegister" Grid.Column="2" Content="Criar Conta" Style="{StaticResource SecondaryBtn}" Click="BtnRegister_Click"/>
                     </Grid>
 
-                    <TextBlock Text="ℹ No plano gratuito do Render, a primeira conexão pode levar ~40s para acordar o servidor."
+                    <TextBlock Text="ℹ Se o servidor estiver em repouso, o primeiro acesso do dia pode levar até ~45s para conectar."
                                TextWrapping="Wrap" FontSize="11" Foreground="#64748B" Margin="0,12,0,0"/>
                 </StackPanel>
 
@@ -150,7 +145,7 @@
                                 <Ellipse Width="8" Height="8" Fill="#10B981" VerticalAlignment="Center" Margin="0,0,7,0"/>
                                 <TextBlock x:Name="TxtAccountUser" Text="Conectado" FontSize="14" FontWeight="Bold" Foreground="#F8FAFC"/>
                             </StackPanel>
-                            <TextBlock x:Name="TxtAccountServer" Text="Servidor: —" FontSize="11.5" Foreground="#94A3B8" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtAccountServer" Text="Nuvem: ChestCounter Cloud" FontSize="11.5" Foreground="#38BDF8" Margin="0,0,0,6"/>
                             <TextBlock x:Name="TxtLocalSummary" Text="Local: —" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4"/>
                             <TextBlock x:Name="TxtLastSync" Text="Última sincronização: agora" FontSize="11.5" Foreground="#64748B"/>
                         </StackPanel>
