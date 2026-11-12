@@ -443,23 +443,25 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header Row -->
-                    <Border Grid.Row="0" Background="#162032" CornerRadius="10,10,0,0" Padding="16,0">
+                    <Border Grid.Row="0" Background="#162032" CornerRadius="10,10,0,0" Padding="12,0,16,0">
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="130"/>
-                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="36"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="190"/>
+                                <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="170"/>
                                 <ColumnDefinition Width="180"/>
-                                <ColumnDefinition Width="200"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="DATA / HORA" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
-                            <TextBlock Grid.Column="1" Text="MODO DE JOGO" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
-                            <TextBlock Grid.Column="2" Text="COLOCAÇÃO" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
-                            <TextBlock Grid.Column="3" Text="BAÚS ABERTOS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
-                            <TextBlock Grid.Column="4" Text="TESOUROS / ESPECIAIS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
-                            <TextBlock Grid.Column="5" Text="ARQUIVO DE REPLAY" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="0" Text="" FontSize="11" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="DATA / HORA" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="2" Text="MODO DE JOGO" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="3" Text="COLOCAÇÃO" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="4" Text="SEUS BAÚS" FontSize="11" FontWeight="Bold" Foreground="#F59E0B"/>
+                            <TextBlock Grid.Column="5" Text="TESOUROS / ESPECIAIS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                            <TextBlock Grid.Column="6" Text="ARQUIVO DE REPLAY" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
                         </Grid>
                     </Border>
 
@@ -468,13 +470,14 @@
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                               VirtualizingStackPanel.IsVirtualizing="True"
-                              VirtualizingStackPanel.VirtualizationMode="Recycling">
+                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                              SelectionChanged="ListMatches_SelectionChanged">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="BorderThickness" Value="0,0,0,1"/>
                                 <Setter Property="BorderBrush" Value="#162032"/>
-                                <Setter Property="Padding" Value="16,10"/>
+                                <Setter Property="Padding" Value="12,8,16,8"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
@@ -501,45 +504,133 @@
 
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="130"/>
-                                        <ColumnDefinition Width="220"/>
-                                        <ColumnDefinition Width="170"/>
-                                        <ColumnDefinition Width="180"/>
-                                        <ColumnDefinition Width="200"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                <Grid Margin="0,2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                    <!-- Date & Time -->
-                                    <TextBlock Grid.Column="0" Text="{Binding DateFormatted}" FontSize="13" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center"/>
+                                    <!-- Row 0: Main Match Summary -->
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="36"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="190"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="170"/>
+                                            <ColumnDefinition Width="180"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <!-- Mode Badge -->
-                                    <Border Grid.Column="1" HorizontalAlignment="Left" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding ModeFormatted}" FontSize="12" Foreground="#94A3B8"/>
+                                        <!-- Arrow Expand/Collapse Button -->
+                                        <Button Grid.Column="0" Style="{StaticResource WinBtn}" Width="26" Height="26" 
+                                                Content="{Binding ExpandArrow}" FontSize="10" Foreground="#F59E0B" 
+                                                ToolTip="Ver baús de cada jogador da equipe"
+                                                Click="BtnExpandMatch_Click" Cursor="Hand" HorizontalAlignment="Left"/>
+
+                                        <!-- Date & Time -->
+                                        <TextBlock Grid.Column="1" Text="{Binding DateFormatted}" FontSize="13" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center"/>
+
+                                        <!-- Mode Badge -->
+                                        <Border Grid.Column="2" HorizontalAlignment="Left" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ModeFormatted}" FontSize="12" Foreground="#94A3B8"/>
+                                        </Border>
+
+                                        <!-- Placement -->
+                                        <Border Grid.Column="3" HorizontalAlignment="Left" Background="{Binding PlacementBg}" BorderBrush="{Binding PlacementBorder}" BorderThickness="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding PlacementFormatted}" FontSize="12" FontWeight="{Binding PlacementWeight}" Foreground="{Binding PlacementColor}"/>
+                                        </Border>
+
+                                        <!-- Chests Count + Progress Bar -->
+                                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ChestsCount}" FontSize="16" FontWeight="Bold" Foreground="#F59E0B" Width="32" VerticalAlignment="Center"/>
+                                            <ProgressBar Width="85" Height="8" Minimum="0" Maximum="45" Value="{Binding ChestsCount}" 
+                                                         Background="#162032" Foreground="#F59E0B" BorderThickness="0" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                <ProgressBar.Clip>
+                                                    <RectangleGeometry Rect="0,0,85,8" RadiusX="4" RadiusY="4"/>
+                                                </ProgressBar.Clip>
+                                            </ProgressBar>
+                                        </StackPanel>
+
+                                        <!-- Treasures -->
+                                        <TextBlock Grid.Column="5" Text="{Binding TreasureText}" FontSize="12" FontWeight="SemiBold" Foreground="#C084FC" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                                        <!-- Replay File -->
+                                        <TextBlock Grid.Column="6" Text="{Binding ReplayFile}" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+
+                                    <!-- Row 1: Expandable Squad Chests Drawer -->
+                                    <Border Grid.Row="1" Visibility="{Binding DetailsVisibility}" 
+                                            Background="#0C1322" BorderBrush="#22304A" BorderThickness="1" 
+                                            CornerRadius="8" Margin="32,8,0,6" Padding="14,10">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Header of the sub-drawer -->
+                                            <Grid Grid.Row="0" Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="👥" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="BAÚS POR JOGADOR DO ESQUADRÃO" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding SquadSummaryText}" FontSize="11" FontWeight="SemiBold" Foreground="#FBBF24" VerticalAlignment="Center"/>
+                                            </Grid>
+
+                                            <!-- Cards for each player in the squad -->
+                                            <ItemsControl Grid.Row="1" ItemsSource="{Binding SquadDisplayMembers}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#131D30" BorderBrush="{Binding CardBorder}" BorderThickness="1.5" CornerRadius="8" Padding="12,8" Margin="0,0,10,6" MinWidth="220">
+                                                            <Grid>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <!-- Player Header: Avatar + Nick + Role Tag -->
+                                                                <Grid Grid.Row="0" Margin="0,0,0,6">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock Grid.Column="0" Text="{Binding AvatarIcon}" FontSize="12" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                                    <TextBlock Grid.Column="1" Text="{Binding PlayerName}" FontSize="12" FontWeight="Bold" Foreground="{Binding NameColor}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                                    <Border Grid.Column="2" Background="{Binding RoleBg}" BorderBrush="{Binding RoleBorder}" BorderThickness="1" CornerRadius="4" Padding="5,1">
+                                                                        <TextBlock Text="{Binding RoleBadge}" FontSize="9" FontWeight="Bold" Foreground="{Binding RoleColor}"/>
+                                                                    </Border>
+                                                                </Grid>
+
+                                                                <!-- Main Stat: Chests -->
+                                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
+                                                                    <TextBlock Text="📦 " FontSize="12" VerticalAlignment="Center"/>
+                                                                    <TextBlock Text="{Binding ChestsCount}" FontSize="16" FontWeight="Bold" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                                                                    <TextBlock Text=" baús" FontSize="11" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="3,2,0,0"/>
+                                                                    <TextBlock Text="{Binding SharePercentText}" FontSize="10" Foreground="#64748B" VerticalAlignment="Center" Margin="6,2,0,0"/>
+                                                                </StackPanel>
+
+                                                                <!-- Secondary Stats: Ammo boxes & other containers -->
+                                                                <TextBlock Grid.Row="2" Text="{Binding ExtraContainersText}" FontSize="10" Foreground="#94A3B8"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Grid>
                                     </Border>
-
-                                    <!-- Placement -->
-                                    <Border Grid.Column="2" HorizontalAlignment="Left" Background="{Binding PlacementBg}" BorderBrush="{Binding PlacementBorder}" BorderThickness="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding PlacementFormatted}" FontSize="12" FontWeight="{Binding PlacementWeight}" Foreground="{Binding PlacementColor}"/>
-                                    </Border>
-
-                                    <!-- Chests Count + Progress Bar -->
-                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding ChestsCount}" FontSize="16" FontWeight="Bold" Foreground="#F59E0B" Width="36" VerticalAlignment="Center"/>
-                                        <ProgressBar Width="90" Height="8" Minimum="0" Maximum="45" Value="{Binding ChestsCount}" 
-                                                     Background="#162032" Foreground="#F59E0B" BorderThickness="0" VerticalAlignment="Center" Margin="6,0,0,0">
-                                            <ProgressBar.Clip>
-                                                <RectangleGeometry Rect="0,0,90,8" RadiusX="4" RadiusY="4"/>
-                                            </ProgressBar.Clip>
-                                        </ProgressBar>
-                                    </StackPanel>
-
-                                    <!-- Treasures -->
-                                    <TextBlock Grid.Column="4" Text="{Binding TreasureText}" FontSize="12" FontWeight="SemiBold" Foreground="#C084FC" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-
-                                    <!-- Replay File -->
-                                    <TextBlock Grid.Column="5" Text="{Binding ReplayFile}" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

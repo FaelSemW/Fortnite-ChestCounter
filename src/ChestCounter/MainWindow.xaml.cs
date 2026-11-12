@@ -10,8 +10,45 @@ using System.Windows.Threading;
 
 namespace ChestCounter;
 
-public sealed class MatchDisplayItem
+public sealed class TeammateDisplayItem
 {
+    public string PlayerName { get; set; } = "";
+    public bool IsLocalPlayer { get; set; }
+    public string AvatarIcon => IsLocalPlayer ? "⭐" : "👤";
+    public string RoleBadge => IsLocalPlayer ? "VOCÊ" : "ALIADO";
+    public Brush RoleBg => IsLocalPlayer ? (Brush)new BrushConverter().ConvertFrom("#261E0A")! : (Brush)new BrushConverter().ConvertFrom("#162032")!;
+    public Brush RoleBorder => IsLocalPlayer ? (Brush)new BrushConverter().ConvertFrom("#F59E0B")! : (Brush)new BrushConverter().ConvertFrom("#22304A")!;
+    public Brush RoleColor => IsLocalPlayer ? (Brush)new BrushConverter().ConvertFrom("#FBBF24")! : (Brush)new BrushConverter().ConvertFrom("#94A3B8")!;
+    public Brush CardBorder => IsLocalPlayer ? (Brush)new BrushConverter().ConvertFrom("#F59E0B")! : (Brush)new BrushConverter().ConvertFrom("#22304A")!;
+    public Brush NameColor => IsLocalPlayer ? (Brush)new BrushConverter().ConvertFrom("#FDE68A")! : (Brush)new BrushConverter().ConvertFrom("#F8FAFC")!;
+    public int ChestsCount { get; set; }
+    public int AmmoBoxesCount { get; set; }
+    public int OtherContainersCount { get; set; }
+    public string SharePercentText { get; set; } = "";
+    public string ExtraContainersText => $"{AmmoBoxesCount} munição • {OtherContainersCount} outros";
+}
+
+public sealed class MatchDisplayItem : INotifyPropertyChanged
+{
+    private bool _isExpanded;
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (_isExpanded != value)
+            {
+                _isExpanded = value;
+                OnPropertyChanged(nameof(IsExpanded));
+                OnPropertyChanged(nameof(DetailsVisibility));
+                OnPropertyChanged(nameof(ExpandArrow));
+            }
+        }
+    }
+
+    public Visibility DetailsVisibility => IsExpanded ? Visibility.Visible : Visibility.Collapsed;
+    public string ExpandArrow => IsExpanded ? "▲" : "▼";
+
     public string DateFormatted { get; set; } = "";
     public string ModeFormatted { get; set; } = "";
     public string PlacementFormatted { get; set; } = "";
@@ -24,6 +61,12 @@ public sealed class MatchDisplayItem
     public string ReplayFile { get; set; } = "";
     public bool IsWin { get; set; }
     public MatchRecord RawMatch { get; set; } = null!;
+
+    public ObservableCollection<TeammateDisplayItem> SquadDisplayMembers { get; } = new();
+    public string SquadSummaryText { get; set; } = "";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
 
 public partial class MainWindow : Window
@@ -261,6 +304,42 @@ public partial class MainWindow : Window
                 item.PlacementWeight = FontWeights.SemiBold;
             }
 
+            // Populate squad breakdown
+            var squad = m.SquadMembers != null && m.SquadMembers.Count > 0
+                ? m.SquadMembers
+                : new List<SquadMemberChests>
+                {
+                    new SquadMemberChests
+                    {
+                        PlayerName = m.PlayerName ?? "Você",
+                        IsLocalPlayer = true,
+                        ChestsOpened = m.ChestsOpened,
+                        AmmoBoxesOpened = m.AmmoBoxesOpened,
+                        OtherContainersOpened = m.OtherContainersOpened
+                    }
+                };
+
+            var totalSquadChests = squad.Sum(s => s.ChestsOpened);
+            item.SquadSummaryText = squad.Count > 1 
+                ? $"Total da Equipe: {totalSquadChests} baús ({squad.Count} jogadores)" 
+                : $"Total: {totalSquadChests} baús (Partida Solo)";
+
+            foreach (var member in squad)
+            {
+                var pct = totalSquadChests > 0 ? (double)member.ChestsOpened / totalSquadChests * 100 : 0.0;
+                var pctText = squad.Count > 1 ? $"({pct:0}%)" : "";
+
+                item.SquadDisplayMembers.Add(new TeammateDisplayItem
+                {
+                    PlayerName = member.PlayerName,
+                    IsLocalPlayer = member.IsLocalPlayer,
+                    ChestsCount = member.ChestsOpened,
+                    AmmoBoxesCount = member.AmmoBoxesOpened,
+                    OtherContainersCount = member.OtherContainersOpened,
+                    SharePercentText = pctText
+                });
+            }
+
             _allMatches.Add(item);
         }
 
@@ -411,6 +490,24 @@ public partial class MainWindow : Window
         TxtOverlayToggle.Text = isVisible ? "Overlay em Jogo: ATIVADO" : "Overlay em Jogo: DESATIVADO";
         TxtLockToggle.Text = isLocked ? "Overlay: TRAVADO (Clique passa)" : "Overlay: DESTRAVADO (Arrastar)";
         TxtStyleToggle.Text = _config.OverlayStyle == "hud" ? "Estilo: HUD Minimapa" : "Estilo: Cartão Clássico";
+    }
+
+    private void BtnExpandMatch_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && fe.DataContext is MatchDisplayItem item)
+        {
+            item.IsExpanded = !item.IsExpanded;
+            e.Handled = true;
+        }
+    }
+
+    private void ListMatches_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ListMatches.SelectedItem is MatchDisplayItem item)
+        {
+            item.IsExpanded = !item.IsExpanded;
+            ListMatches.SelectedItem = null;
+        }
     }
 
     private void BtnMinimize_Click(object sender, RoutedEventArgs e)

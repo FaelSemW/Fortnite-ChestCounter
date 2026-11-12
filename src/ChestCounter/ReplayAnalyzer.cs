@@ -848,6 +848,45 @@ public sealed class ReplayAnalyzer : FortniteReplayReader.ReplayReader
         var isRecorder = recorderPs != null && targetPlayerStates.Contains(recorderPs.Value);
         var placement = target?.Placement ?? (isRecorder ? (int?)replay.TeamStats?.Position : null);
 
+        // Squad chests breakdown (local player + teammates)
+        var squadMembers = new List<SquadMemberChests>();
+        squadMembers.Add(new SquadMemberChests
+        {
+            PlayerName = target?.PlayerName ?? recorderPlayer?.PlayerName ?? "Você",
+            IsLocalPlayer = true,
+            ChestsOpened = chests.Count,
+            AmmoBoxesOpened = others.GetValueOrDefault(ChestKinds.AmmoBox),
+            OtherContainersOpened = others.Where(kv => kv.Key != ChestKinds.AmmoBox).Sum(kv => kv.Value)
+        });
+
+        if (target?.TeamIndex is int teamIdx)
+        {
+            var mates = players.Where(p => p.TeamIndex == teamIdx && p.Id != target.Id).ToList();
+            foreach (var mate in mates)
+            {
+                var mateStates = _playerStateToPlayerId.Where(kv => kv.Value == mate.Id).Select(kv => kv.Key).ToHashSet();
+                var matePawns = _pawnToPlayerState.Where(kv => mateStates.Contains(kv.Value)).Select(kv => kv.Key).ToHashSet();
+
+                var mateSearches = _searches
+                    .Where(s => s.SearcherPawn is uint p && matePawns.Contains(p) && (!s.Stale || StableKey(s.ActorKey)))
+                    .Select(s => (Kind: ChestKinds.Classify(s.Label), s.Label, s.Destroyed))
+                    .ToList();
+
+                var mateChests = mateSearches.Count(s => ChestKinds.IsChest(s.Kind));
+                var mateAmmo = mateSearches.Count(s => s.Kind == ChestKinds.AmmoBox);
+                var mateOther = mateSearches.Count(s => !ChestKinds.IsChest(s.Kind) && s.Kind != ChestKinds.AmmoBox);
+
+                squadMembers.Add(new SquadMemberChests
+                {
+                    PlayerName = string.IsNullOrWhiteSpace(mate.PlayerName) ? $"Aliado #{mate.Id}" : mate.PlayerName,
+                    IsLocalPlayer = false,
+                    ChestsOpened = mateChests,
+                    AmmoBoxesOpened = mateAmmo,
+                    OtherContainersOpened = mateOther
+                });
+            }
+        }
+
         return new MatchRecord
         {
             SessionId = replay.GameData?.GameSessionId ?? $"{info?.Timestamp:O}-{Path.GetFileName(file)}",
@@ -872,6 +911,7 @@ public sealed class ReplayAnalyzer : FortniteReplayReader.ReplayReader
             AnalyzerVersion = CurrentVersion,
             IsBattleRoyale = !string.IsNullOrEmpty(replay.GameData?.CurrentPlaylist) || chests.Count > 0,
             Chests = chests,
+            SquadMembers = squadMembers,
             TreasureFinds = finds,
             TeamTreasureFinds = teamFinds,
         };

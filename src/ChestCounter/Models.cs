@@ -3,6 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace ChestCounter;
 
+public sealed class SquadMemberChests
+{
+    public string PlayerName { get; set; } = "";
+    public bool IsLocalPlayer { get; set; }
+    public int ChestsOpened { get; set; }
+    public int AmmoBoxesOpened { get; set; }
+    public int OtherContainersOpened { get; set; }
+}
+
 public sealed class ChestRecord
 {
     public float TimeSeconds { get; set; }
@@ -72,6 +81,7 @@ public sealed class MatchRecord
     public int AnalyzerVersion { get; set; } = 1;
     public bool IsBattleRoyale { get; set; } = true;
     public List<ChestRecord> Chests { get; set; } = new();
+    public List<SquadMemberChests> SquadMembers { get; set; } = new();
     public List<TreasureFind> TreasureFinds { get; set; } = new();
     /// <summary>Treasures found by teammates (shared with the whole team). Not counted in the player's own totals.</summary>
     public List<TreasureFind> TeamTreasureFinds { get; set; } = new();
