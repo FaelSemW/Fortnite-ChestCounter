@@ -75,6 +75,7 @@
             <Setter Property="Height" Value="38"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="shell:WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -93,12 +94,21 @@
         </Style>
 
         <Style x:Key="CloseBtn" TargetType="Button" BasedOn="{StaticResource WinBtn}">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#DC2626"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#DC2626"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Filter Pill Button Style -->
@@ -228,10 +238,10 @@
                 </StackPanel>
 
                 <!-- Right: Window Buttons -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Style="{StaticResource WinBtn}" Content="─" Click="BtnMinimize_Click" ToolTip="Minimizar"/>
-                    <Button Style="{StaticResource WinBtn}" Content="□" Click="BtnMaximize_Click" ToolTip="Maximizar"/>
-                    <Button Style="{StaticResource CloseBtn}" Content="✕" Click="BtnClose_Click" ToolTip="Fechar"/>
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource WinBtn}" Content="─" Click="BtnMinimize_Click" ToolTip="Minimizar" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    <Button Style="{StaticResource WinBtn}" Content="□" Click="BtnMaximize_Click" ToolTip="Maximizar" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    <Button Style="{StaticResource CloseBtn}" Content="✕" Click="BtnClose_Click" ToolTip="Fechar" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </StackPanel>
             </Grid>
         </Border>
