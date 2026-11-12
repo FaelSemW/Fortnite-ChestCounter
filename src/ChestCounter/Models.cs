@@ -128,6 +128,12 @@ public sealed class Config
 
     /// <summary>Minimum delay between two readings of the replay in progress (seconds, 10 minimum).</summary>
     public int LiveIntervalSeconds { get; set; } = 30;
+
+    /// <summary>Cloud save server (Render), e.g. https://chestcounter-cloud.onrender.com</summary>
+    public string? CloudUrl { get; set; }
+    public string? CloudUser { get; set; }
+    /// <summary>Login token (the password itself is never stored).</summary>
+    public string? CloudToken { get; set; }
 }
 
 public sealed class TrackerData
@@ -135,6 +141,9 @@ public sealed class TrackerData
     public int Version { get; set; } = 1;
     public int AnalyzerVersion { get; set; } = 1;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Start of the current session, kept between launches (and in the cloud).</summary>
+    public DateTime? SessionStartUtc { get; set; }
     public List<MatchRecord> Matches { get; set; } = new();
 
     /// <summary>Key = file name|size|last write ticks. Value = session id, "skipped" or "error: ...".</summary>

@@ -278,9 +278,15 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Right: Refresh & Feedback -->
+                <!-- Right: Cloud, Feedback & Refresh -->
                 <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock x:Name="TxtRefreshFeedback" Text="" FontSize="11" Foreground="#10B981" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtRefreshFeedback" Text="" FontSize="11" Foreground="#10B981" Margin="0,0,10,0" VerticalAlignment="Center" MaxWidth="260" TextTrimming="CharacterEllipsis"/>
+                    <Button x:Name="BtnCloud" Style="{StaticResource ActionBtn}" Margin="0,0,8,0" Click="BtnCloud_Click" ToolTip="Salvar e sincronizar baús na nuvem (Render)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="IconCloud" Text="☁" Foreground="#38BDF8" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtCloudStatus" Text="Nuvem: Conectar" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     <Button x:Name="BtnRefresh" Style="{StaticResource ActionBtn}" Background="#261E0A" BorderBrush="#F59E0B" Click="BtnRefresh_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock x:Name="IconRefresh" Text="🔄" Margin="0,0,6,0" VerticalAlignment="Center"/>
@@ -294,6 +300,7 @@
         <!-- ==================== 3. HERO STAT CARDS ==================== -->
         <Grid Grid.Row="2" Margin="16,10">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -313,13 +320,36 @@
                         <TextBlock Text="📦" FontSize="13" Margin="0,0,6,0"/>
                         <TextBlock Text="TOTAL DE BAÚS" FontSize="11" FontWeight="Bold" Foreground="#F59E0B"/>
                     </StackPanel>
-                    <TextBlock x:Name="StatTotalChests" Grid.Row="1" Text="1.816" FontSize="30" FontWeight="Bold" Foreground="#FBBF24" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatTotalChests" Grid.Row="1" Text="0" FontSize="30" FontWeight="Bold" Foreground="#FBBF24" VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="2" Text="Abertos ou destruídos" FontSize="10" Foreground="#94A3B8"/>
                 </Grid>
             </Border>
 
-            <!-- Card 2: Partidas Analisadas -->
-            <Border Grid.Column="1" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+            <!-- Card 2: Sessão Atual (Persistente) -->
+            <Border Grid.Column="1" Background="#162032" BorderBrush="#0284C7" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock Text="⏱" FontSize="13" Margin="0,0,6,0"/>
+                            <TextBlock Text="SESSÃO ATUAL" FontSize="11" FontWeight="Bold" Foreground="#38BDF8"/>
+                        </StackPanel>
+                        <Button x:Name="BtnResetSession" Content="Zerar" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Background="#0E1726" Foreground="#94A3B8" BorderBrush="#334155" BorderThickness="1"
+                                FontSize="9.5" Padding="6,1" Cursor="Hand" Click="BtnResetSession_Click"
+                                ToolTip="Inicia uma nova contagem de sessão sem apagar seu total histórico"/>
+                    </Grid>
+                    <TextBlock x:Name="StatSessionChests" Grid.Row="1" Text="0" FontSize="30" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatSessionSub" Grid.Row="2" Text="Salvo mesmo ao fechar" FontSize="10" Foreground="#94A3B8"/>
+                </Grid>
+            </Border>
+
+            <!-- Card 3: Partidas Analisadas -->
+            <Border Grid.Column="2" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -330,13 +360,13 @@
                         <TextBlock Text="🎮" FontSize="13" Margin="0,0,6,0"/>
                         <TextBlock Text="PARTIDAS" FontSize="11" FontWeight="Bold" Foreground="#06B6D4"/>
                     </StackPanel>
-                    <TextBlock x:Name="StatTotalMatches" Grid.Row="1" Text="99" FontSize="30" FontWeight="Bold" Foreground="#22D3EE" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatTotalMatches" Grid.Row="1" Text="0" FontSize="30" FontWeight="Bold" Foreground="#22D3EE" VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="2" Text="Todas gravadas sem limite" FontSize="10" Foreground="#94A3B8"/>
                 </Grid>
             </Border>
 
-            <!-- Card 3: Média por Partida -->
-            <Border Grid.Column="2" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+            <!-- Card 4: Média por Partida -->
+            <Border Grid.Column="3" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -347,13 +377,13 @@
                         <TextBlock Text="📈" FontSize="13" Margin="0,0,6,0"/>
                         <TextBlock Text="MÉDIA / PARTIDA" FontSize="11" FontWeight="Bold" Foreground="#10B981"/>
                     </StackPanel>
-                    <TextBlock x:Name="StatAvgChests" Grid.Row="1" Text="18.3" FontSize="30" FontWeight="Bold" Foreground="#34D399" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatAvgChests" Grid.Row="1" Text="0.0" FontSize="30" FontWeight="Bold" Foreground="#34D399" VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="2" Text="Baús por jogo" FontSize="10" Foreground="#94A3B8"/>
                 </Grid>
             </Border>
 
-            <!-- Card 4: Recorde em 1 Partida -->
-            <Border Grid.Column="3" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
+            <!-- Card 5: Recorde em 1 Partida -->
+            <Border Grid.Column="4" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Margin="0,0,8,0" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -364,13 +394,13 @@
                         <TextBlock Text="🏆" FontSize="13" Margin="0,0,6,0"/>
                         <TextBlock Text="RECORDE" FontSize="11" FontWeight="Bold" Foreground="#F97316"/>
                     </StackPanel>
-                    <TextBlock x:Name="StatBestMatch" Grid.Row="1" Text="40" FontSize="30" FontWeight="Bold" Foreground="#FB923C" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatBestMatch" Grid.Row="1" Text="0" FontSize="30" FontWeight="Bold" Foreground="#FB923C" VerticalAlignment="Center"/>
                     <TextBlock x:Name="StatBestMatchSub" Grid.Row="2" Text="Máximo em 1 partida" FontSize="10" Foreground="#94A3B8"/>
                 </Grid>
             </Border>
 
-            <!-- Card 5: Tesouros Especiais -->
-            <Border Grid.Column="4" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Padding="14,10">
+            <!-- Card 6: Tesouros Especiais -->
+            <Border Grid.Column="5" Background="#162032" BorderBrush="#22304A" BorderThickness="1" CornerRadius="10" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -381,7 +411,7 @@
                         <TextBlock Text="⭐" FontSize="13" Margin="0,0,6,0"/>
                         <TextBlock Text="TESOUROS" FontSize="11" FontWeight="Bold" Foreground="#A855F7"/>
                     </StackPanel>
-                    <TextBlock x:Name="StatTreasures" Grid.Row="1" Text="12" FontSize="30" FontWeight="Bold" Foreground="#C084FC" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatTreasures" Grid.Row="1" Text="0" FontSize="30" FontWeight="Bold" Foreground="#C084FC" VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="2" Text="Gizmos e baús dourados" FontSize="10" Foreground="#94A3B8"/>
                 </Grid>
             </Border>

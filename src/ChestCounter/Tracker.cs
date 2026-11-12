@@ -32,6 +32,8 @@ public sealed class Tracker
         _store = store;
         _config = config;
         _data = data;
+        ReportWriter.InitSession(_data);
+        _store.SaveData(_data);
 
         // Before version 1.1, matches of other accounts were rejected ("autre joueur"): they now get their own profile.
         foreach (var key in _data.ProcessedFiles.Where(kv => kv.Value.StartsWith("autre joueur", StringComparison.Ordinal)).Select(kv => kv.Key).ToList())
@@ -261,6 +263,7 @@ public sealed class Tracker
 
         _data.Matches.Add(record);
         _data.ProcessedFiles[key] = record.SessionId;
+        ReportWriter.EnsureSessionSaved(_data);
         _store.SaveData(_data);
         if (_liveFile == file.FullName)
         {

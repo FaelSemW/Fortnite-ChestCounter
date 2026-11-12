@@ -12,3 +12,5 @@ matches.csv
 report.html
 .vscode/
 .idea/
+node_modules/
+.env

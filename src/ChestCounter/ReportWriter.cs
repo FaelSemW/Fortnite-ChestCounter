@@ -72,7 +72,48 @@ public sealed record ScanProgress(int Done, int Total);
 
 public static class ReportWriter
 {
-    public static readonly DateTime SessionStartUtc = DateTime.UtcNow;
+    public static DateTime SessionStartUtc { get; private set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Restores the saved session so closing the app or switching PCs never resets the counter.
+    /// When no session was saved yet on an empty database, keeps SessionStartUtc null in data so cloud login can restore an older session.
+    /// </summary>
+    public static void InitSession(TrackerData data)
+    {
+        if (data.SessionStartUtc.HasValue)
+        {
+            var saved = data.SessionStartUtc.Value;
+            if (saved.Kind == DateTimeKind.Unspecified)
+            {
+                saved = DateTime.SpecifyKind(saved, DateTimeKind.Utc);
+            }
+            SessionStartUtc = saved.ToUniversalTime();
+            data.SessionStartUtc = SessionStartUtc;
+            return;
+        }
+
+        SessionStartUtc = DateTime.UtcNow;
+        if (data.Matches.Count > 0)
+        {
+            data.SessionStartUtc = SessionStartUtc;
+        }
+    }
+
+    /// <summary>Persists the in-memory session start once the user plays a match offline.</summary>
+    public static void EnsureSessionSaved(TrackerData data)
+    {
+        if (!data.SessionStartUtc.HasValue)
+        {
+            data.SessionStartUtc = SessionStartUtc;
+        }
+    }
+
+    /// <summary>Starts a fresh session right now (button in the app).</summary>
+    public static void ResetSession(TrackerData data)
+    {
+        SessionStartUtc = DateTime.UtcNow;
+        data.SessionStartUtc = SessionStartUtc;
+    }
 
     /// <summary>Set while several replays are being analyzed: the report shows a loading card and refreshes faster.</summary>
     public static volatile ScanProgress? Progress;

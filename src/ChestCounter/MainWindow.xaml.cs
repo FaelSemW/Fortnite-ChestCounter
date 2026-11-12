@@ -75,6 +75,7 @@ public partial class MainWindow : Window
     private readonly Config _config;
     private readonly TrackerData _data;
     private readonly Tracker _tracker;
+    private readonly CloudSync _cloud;
     private readonly DispatcherTimer _pollTimer;
     private FileSystemWatcher? _watcher;
     private readonly ObservableCollection<MatchDisplayItem> _allMatches = new();
@@ -82,6 +83,8 @@ public partial class MainWindow : Window
     private string _currentFilter = "All";
     private string _searchQuery = "";
     private bool _isFortniteRunning = false;
+    private bool _scanBusy = false;
+    private DateTime _lastAutoSyncUtc = DateTime.MinValue;
 
     public MainWindow(Store store, Config config, TrackerData data, Tracker tracker)
     {
@@ -90,12 +93,14 @@ public partial class MainWindow : Window
         _config = config;
         _data = data;
         _tracker = tracker;
+        _cloud = new CloudSync(_store, _config, _data);
 
         ListMatches.ItemsSource = _displayMatches;
         TxtDemosFolder.Text = _config.DemosFolder;
 
         LoadData();
         UpdateOverlayButtons();
+        UpdateCloudButton();
         SetupWatcher();
 
         // High-frequency polling timer (every 2 seconds) for seamless auto-sync
@@ -106,11 +111,16 @@ public partial class MainWindow : Window
         _pollTimer.Tick += OnPollTick;
         _pollTimer.Start();
 
-        Loaded += (s, e) =>
+        Loaded += async (s, e) =>
         {
             ErrorLog.Write("WindowLoaded", "Window Loaded Successfully!");
             UpdateStatusPill();
             UpdateFortniteProcessState();
+            UpdateCloudButton();
+            if (_cloud.IsLoggedIn)
+            {
+                await SyncCloudAsync(silent: false);
+            }
         };
 
         Closing += (s, e) => ErrorLog.Write("WindowClosing", "Closing triggered. Cancel=" + e.Cancel);
@@ -148,6 +158,8 @@ public partial class MainWindow : Window
 
     private void RunBackgroundScan(bool isManual)
     {
+        if (_scanBusy || _cloud.Busy) return;
+        _scanBusy = true;
         try
         {
             var countBefore = _data.Matches.Count;
@@ -162,10 +174,19 @@ public partial class MainWindow : Window
                 LoadData();
                 ShowFeedback($"🎉 {newCount} nova partida adicionada!");
             }
+
+            if ((newCount > 0 || _cloud.Dirty) && _cloud.IsLoggedIn && DateTime.UtcNow - _lastAutoSyncUtc > TimeSpan.FromSeconds(5))
+            {
+                _ = SyncCloudAsync(silent: true);
+            }
         }
         catch
         {
             // Ignore scan errors during poll
+        }
+        finally
+        {
+            _scanBusy = false;
         }
     }
 
@@ -252,17 +273,24 @@ public partial class MainWindow : Window
         TxtPlayerName.Text = string.IsNullOrEmpty(player) ? "Jogador" : player;
 
         // Compute Hero Stats
+        var pt = CultureInfo.GetCultureInfo("pt-BR");
         var totalChests = matches.Sum(m => m.ChestsOpened);
+        var sessionMatches = matches.Where(ReportWriter.IsThisSession).ToList();
+        var sessionChests = sessionMatches.Sum(m => m.ChestsOpened);
         var totalMatches = matches.Count;
         var avg = totalMatches > 0 ? (double)totalChests / totalMatches : 0.0;
         var best = totalMatches > 0 ? matches.Max(m => m.ChestsOpened) : 0;
         var treasures = matches.Sum(m => m.TreasureFinds.Count);
 
-        StatTotalChests.Text = totalChests.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"));
-        StatTotalMatches.Text = totalMatches.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"));
-        StatAvgChests.Text = avg.ToString("0.0", CultureInfo.GetCultureInfo("pt-BR"));
-        StatBestMatch.Text = best.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"));
-        StatTreasures.Text = treasures.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"));
+        StatTotalChests.Text = totalChests.ToString("N0", pt);
+        StatSessionChests.Text = sessionChests.ToString("N0", pt);
+        StatSessionSub.Text = sessionMatches.Count == 1
+            ? "1 partida nesta sessão"
+            : $"{sessionMatches.Count:N0} partidas nesta sessão";
+        StatTotalMatches.Text = totalMatches.ToString("N0", pt);
+        StatAvgChests.Text = avg.ToString("0.0", pt);
+        StatBestMatch.Text = best.ToString("N0", pt);
+        StatTreasures.Text = treasures.ToString("N0", pt);
 
         // Format each match item
         _allMatches.Clear();
@@ -408,6 +436,13 @@ public partial class MainWindow : Window
 
     private async void BtnRefresh_Click(object sender, RoutedEventArgs e)
     {
+        if (_scanBusy || _cloud.Busy)
+        {
+            ShowFeedback("⏳ Aguarde a sincronização atual terminar...");
+            return;
+        }
+
+        _scanBusy = true;
         BtnRefresh.IsEnabled = false;
         TxtRefreshLabel.Text = "Verificando...";
         IconRefresh.Text = "⏳";
@@ -431,7 +466,7 @@ public partial class MainWindow : Window
             TxtRefreshFeedback.Foreground = new SolidColorBrush(Color.FromRgb(16, 185, 129));
             TxtRefreshFeedback.Text = newCount > 0 
                 ? $"🎉 {newCount} nova(s) partida(s) adicionada(s)!" 
-                : $"✅ Histórico sincronizado às {DateTime.Now:HH:mm:ss} ({_data.Matches.Count} partidas)";
+                : $"✅ Histórico local atualizado às {DateTime.Now:HH:mm:ss} ({_data.Matches.Count} partidas)";
         }
         catch (Exception ex)
         {
@@ -440,10 +475,104 @@ public partial class MainWindow : Window
         }
         finally
         {
-            await System.Threading.Tasks.Task.Delay(500);
+            _scanBusy = false;
+            await System.Threading.Tasks.Task.Delay(300);
             BtnRefresh.IsEnabled = true;
             TxtRefreshLabel.Text = "Atualizar Partidas";
             IconRefresh.Text = "🔄";
+        }
+
+        if (_cloud.IsLoggedIn)
+        {
+            await SyncCloudAsync(silent: false);
+        }
+    }
+
+    private void UpdateCloudButton()
+    {
+        if (_cloud.IsLoggedIn)
+        {
+            IconCloud.Foreground = new SolidColorBrush(Color.FromRgb(16, 185, 129));
+            TxtCloudStatus.Text = _cloud.Busy ? "Nuvem: Sincronizando..." : $"Nuvem: {_cloud.User}";
+            TxtCloudStatus.Foreground = new SolidColorBrush(Color.FromRgb(110, 231, 183));
+        }
+        else
+        {
+            IconCloud.Foreground = new SolidColorBrush(Color.FromRgb(56, 189, 248));
+            TxtCloudStatus.Text = "Nuvem: Conectar";
+            TxtCloudStatus.Foreground = new SolidColorBrush(Color.FromRgb(226, 232, 240));
+        }
+    }
+
+    private async Task SyncCloudAsync(bool silent)
+    {
+        if (_scanBusy || _cloud.Busy || !_cloud.IsLoggedIn) return;
+        _lastAutoSyncUtc = DateTime.UtcNow;
+
+        TxtCloudStatus.Text = "Nuvem: Sincronizando...";
+        if (!silent)
+        {
+            TxtRefreshFeedback.Foreground = new SolidColorBrush(Color.FromRgb(56, 189, 248));
+            TxtRefreshFeedback.Text = "☁ Sincronizando com a nuvem...";
+        }
+
+        var res = await _cloud.SyncAsync();
+        LoadData();
+        UpdateOverlayView();
+        ReportWriter.WriteAll(_store, _config, _data);
+        UpdateCloudButton();
+
+        if (res.Ok)
+        {
+            if (!silent || res.Message.Contains("+") && !res.Message.Contains("+0 baixadas"))
+            {
+                ShowFeedback(res.Message);
+            }
+        }
+        else if (!silent)
+        {
+            TxtRefreshFeedback.Foreground = new SolidColorBrush(Color.FromRgb(252, 165, 165));
+            TxtRefreshFeedback.Text = res.Message;
+        }
+    }
+
+    private void BtnCloud_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new CloudWindow(_cloud, _config, _data) { Owner = this };
+        dlg.ShowDialog();
+        UpdateCloudButton();
+        if (dlg.DataChanged)
+        {
+            LoadData();
+            UpdateOverlayView();
+            ReportWriter.WriteAll(_store, _config, _data);
+            if (_cloud.IsLoggedIn)
+            {
+                ShowFeedback($"☁ Conectado como {_cloud.User} ({_data.Matches.Sum(m => m.ChestsOpened):N0} baús)");
+            }
+        }
+    }
+
+    private async void BtnResetSession_Click(object sender, RoutedEventArgs e)
+    {
+        var confirm = MessageBox.Show(
+            "Deseja zerar apenas o contador da sessão atual?\n\nSeu total histórico e partidas salvas na nuvem continuam intactos.",
+            "Zerar Sessão Atual",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes) return;
+
+        ReportWriter.ResetSession(_data);
+        _store.SaveData(_data);
+        LoadData();
+        UpdateOverlayView();
+        ReportWriter.WriteAll(_store, _config, _data);
+        ShowFeedback("⏱ Nova sessão iniciada!");
+
+        if (_cloud.IsLoggedIn)
+        {
+            await SyncCloudAsync(silent: true);
         }
     }
 
