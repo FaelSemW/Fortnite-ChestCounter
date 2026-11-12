@@ -2,6 +2,7 @@ services:
   - type: web
     name: chestcounter-cloud
     runtime: node
+    region: virginia
     rootDir: server
     plan: free
     buildCommand: npm install
