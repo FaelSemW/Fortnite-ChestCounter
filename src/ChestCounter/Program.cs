@@ -119,6 +119,11 @@ if (previewPath == null && !AcquireInstance(instance, afterUpdate ? TimeSpan.Fro
     {
         return 0; // opened with Fortnite while the player had already opened it: nothing to do
     }
+    if (OperatingSystem.IsWindows() && EventWaitHandle.TryOpenExisting(AppInfo.ShowWindowEventFor(dataDir), out var showExisting))
+    {
+        using (showExisting) { showExisting.Set(); }
+        if (!interactive) return 0;
+    }
     L.Set(store.LoadConfig()?.Language ?? L.SystemDefault);
     Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine(L.T("  Le compteur de coffres est déjà ouvert : regarde dans la barre des tâches.",
@@ -412,7 +417,19 @@ if (OperatingSystem.IsWindows())
                 ErrorLog.Write("DispatcherCrash", args.Exception);
             };
             var mainWindow = new MainWindow(store, config, data, tracker);
-            wpfApp.Run(mainWindow);
+            using var showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, AppInfo.ShowWindowEventFor(dataDir));
+            var waitHandle = ThreadPool.RegisterWaitForSingleObject(showEvent, (_, _) =>
+            {
+                try { mainWindow.Dispatcher.BeginInvoke(() => mainWindow.BringToFront()); } catch { }
+            }, null, -1, false);
+            try
+            {
+                wpfApp.Run(mainWindow);
+            }
+            finally
+            {
+                waitHandle.Unregister(null);
+            }
         }
         catch (Exception ex)
         {

@@ -654,6 +654,16 @@ public partial class MainWindow : Window
         Close();
     }
 
+    public void BringToFront()
+    {
+        if (!IsVisible) Show();
+        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        Activate();
+        Topmost = true;
+        Topmost = false;
+        Focus();
+    }
+
     protected override void OnClosing(CancelEventArgs e)
     {
         _pollTimer.Stop();
